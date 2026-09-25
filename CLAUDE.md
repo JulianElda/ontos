@@ -1,12 +1,12 @@
 # CLAUDE.md
 
-This repo holds the `ontos` command and, later, its skills. It does not hold the knowledge:
+This repo holds the `ontos` command and its skills. It does not hold the knowledge:
 that lives in the store named by `store` in `~/.config/ontos/config.toml`, usually a
 cloud-synced folder. [DESIGN.md](DESIGN.md) is the contract; [README.md](README.md) is the
 tour.
 
 Commits are single-line conventional-commit titles. Scope is `ontos` for the command, `setup`
-for `scripts/setup.sh`, `design` for `DESIGN.md`, or the skill name.
+for `scripts/setup.sh`, `design` for `DESIGN.md`, or the skill name (`ontos-bootstrap`).
 Branch is `master`.
 
 ## Setup
@@ -61,6 +61,13 @@ Rules that hold the design in place:
   `given(fs)`, never by comparing against a zero value, so an empty value can clear a field.
 - Test against a scratch store: `ONTOS_CONFIG=<file> ontos …`, and `scripts/setup.sh`
   honours it too. The CLI tests run `run()` in-process against a temp store.
+
+## The skills
+
+`skills/ontos-bootstrap/SKILL.md` builds or re-verifies a subject's entries from the code and
+ports `.claude-docs`. It carries its own copy of the category table from `DESIGN.md`, because it
+runs in other repos where `DESIGN.md` is not at hand: change one, change the other. Every
+`ontos` verb and flag it names must exist in `ontos help`.
 
 ## Checks
 

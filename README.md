@@ -47,3 +47,10 @@ echo 'Levels are read once at startup.' | ontos add --title 'Log level changes n
   --certainty confirmed --body-file -
 ontos context
 ```
+
+## Bootstrapping a subject
+
+In Claude Code, `/ontos-bootstrap` in a repo researches it, checks each claim against the code,
+shows every proposed entry in one table, and writes them after one yes. Run it again later and
+it re-verifies what is stored before adding anything. `/ontos-bootstrap <path to .claude-docs>`
+ports an old doc set the same way.
