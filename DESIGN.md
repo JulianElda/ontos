@@ -156,11 +156,24 @@ Ported from the replaced skill; one copy lives in the tool (`internal/ontos/rule
 
 ## Bootstrap skill
 
-A separate skill in the ontos repo (`skills/`, symlinked into `~/.claude/skills/`, the way
-pragma does it). It builds a subject's entries from scratch: researches the repo with parallel
-forks, verifies against code, and writes through the CLI. It's also used to port existing
-`.claude-docs`, sorting each doc section into categories. That sorting is a judgment call, not
-parsing, so a skill does it rather than an `import` command.
+A separate skill in the ontos repo, `skills/ontos-bootstrap/SKILL.md`, symlinked into
+`~/.claude/skills/` the way pragma does it and run as `/ontos-bootstrap`. It builds a subject's
+entries from scratch: researches the repo with parallel forks, verifies against code, and writes
+through the CLI. It's also used to port existing `.claude-docs`, sorting each doc section into
+categories. That sorting is a judgment call, not parsing, so a skill does it rather than an
+`import` command.
+
+- **Two modes, chosen by what the store holds.** A subject with no entries is built. A subject
+  with entries is re-verified against HEAD first (each entry updated, deleted, or its `checked`
+  refreshed), then filled in. This is the manual form of the v2 `stale` candidate.
+- **Forks return candidates and never write.** Only the main agent calls the CLI, so duplicate
+  checks and certainty are decided in one place: `confirmed` only for what it read or ran itself.
+- **One approval.** All candidate entries, verdicts and new subjects are shown as one table and
+  written after a single yes. This is the exception to "writing happens without asking": a batch
+  of dozens of entries in a store without history costs too much to clean up by hand.
+- **Inferability.** Lore skips anything a competent agent could reproduce by reading the code.
+  Bootstrap works from the code by definition, so it takes principle 3's line instead: skip what
+  a single `rg` answers, keep explanations that cost a real read to work out.
 
 ## Implementation
 
