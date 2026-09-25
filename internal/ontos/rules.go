@@ -17,6 +17,6 @@ var Rules = strings.NewReplacer("{", "`", "}", "`").Replace(`- An entry is wrong
 - {confirmed} only for what you ran or read in code; otherwise {inferred} or {suspected}. Never
   write a suspected bug as fact.
 - Never store secrets, tokens, credentials, or URLs with credentials in them.
-- Plans and open work go to pragma; personal preferences go to auto memory.
+- Plans and open work are not entries; personal preferences go to auto memory.
 - {ontos help} lists the verbs and their flags. Bodies go through stdin: {--body-file -}.
 `)

@@ -21,8 +21,8 @@ Status: v1 implemented; this is the contract.
   (50–150 lines) verified against the code, and kept a routing table ("doing X → read Y") that
   was loaded every session with standing rules to keep the docs current. The docs get ported
   into ontos.
-- **Neighbors:** `~/workspace/pragma` owns plans, tasks, open work and its own history. Claude
-  Code's built-in auto memory stays, holding preferences and feedback. ontos holds neither.
+- **Neighbors:** plans, tasks and open work live outside ontos, in a task tracker. Claude Code's
+  built-in auto memory stays, holding preferences and feedback. ontos holds neither.
 
 ## Principles
 
@@ -54,8 +54,8 @@ change → `invariant`; will surprise Claude → `gotcha`; steps → `procedure`
 symptom → `diagnosis`; broken or unreliable → `gap`; points outside → `reference`.
 
 An in-progress migration gets split: the direction becomes an `invariant` ("new code uses the new
-design system"), the remaining work goes to pragma, and the list of call sites isn't stored
-(`rg` finds them).
+design system"), the remaining work belongs in a task tracker, and the list of call sites isn't
+stored (`rg` finds them).
 
 ## Data model
 
@@ -134,7 +134,7 @@ should notice sync-conflict copies.
 - **One hook:** `SessionStart` → `ontos context`. It fires on startup, resume, `clear` and
   `compact`, and its stdout is added to Claude's context.
 - **Root `~/.claude/CLAUDE.md`:** a short instruction to use ontos for repo knowledge
-  (preferences stay in auto memory, plans in pragma).
+  (preferences stay in auto memory, plans out of both).
 - **Permission:** `Bash(ontos:*)`.
 - **Writing happens in-session.** Claude writes through the CLI whenever the work calls for it,
   without asking. There's no background agent in v1.
@@ -152,12 +152,12 @@ Ported from the replaced skill; one copy lives in the tool (`internal/ontos/rule
 - `confirmed` only for what you ran or read in code; otherwise `inferred` or `suspected`. Never
   write a suspected bug as fact.
 - Never store secrets, tokens, credentials, or URLs with credentials in them.
-- Plans and open work go to pragma; personal preferences go to auto memory.
+- Plans and open work are not entries; personal preferences go to auto memory.
 
 ## Bootstrap skill
 
 A separate skill in the ontos repo, `skills/ontos-bootstrap/SKILL.md`, symlinked into
-`~/.claude/skills/` the way pragma does it and run as `/ontos-bootstrap`. It builds a subject's
+`~/.claude/skills/` and run as `/ontos-bootstrap`. It builds a subject's
 entries from scratch: researches the repo with parallel forks, verifies against code, and writes
 through the CLI. It's also used to port existing `.claude-docs`, sorting each doc section into
 categories. That sorting is a judgment call, not parsing, so a skill does it rather than an
@@ -177,7 +177,7 @@ categories. That sorting is a judgment call, not parsing, so a skill does it rat
 
 ## Implementation
 
-- Go, laid out like pragma: `github.com/JulianElda/ontos`, `cmd/ontos/`, `internal/ontos/`,
+- Go: `github.com/JulianElda/ontos`, `cmd/ontos/`, `internal/ontos/`,
   `BurntSushi/toml` for config, stdlib `encoding/json`, `flake.nix`, `scripts/setup.sh`.
 - A single static binary; starts fast, which matters because the hook runs on every session.
 
@@ -207,7 +207,7 @@ and (c) stay open for later without changing the store.
   adding, a recursion guard in the environment, and a smaller model.
 - `stale`: entries whose `sources` changed since `checked`
   (`git diff --name-only <sha>..HEAD -- <sources>`).
-- Operation log (per-machine JSONL like pragma's), for debugging, never read by Claude.
+- Operation log (per-machine JSONL), for debugging, never read by Claude.
 - An optional `review_by` field for `reference` entries, which diffs can't catch going stale.
 - A local SQLite FTS index cache (`modernc.org/sqlite`), only if loading gets slow on a slow
   filesystem.

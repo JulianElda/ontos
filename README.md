@@ -17,8 +17,22 @@ looks the way it does. [CLAUDE.md](CLAUDE.md) covers working on this repo.
 
 It seeds `~/.config/ontos/config.toml` (never overwriting it), creates the store it names
 (`~/ontos` by default; point `store` at a synced folder and re-run), builds
-`~/.local/bin/ontos`, and prints the `Bash(ontos:*)` permission, the `SessionStart` hook and
-the `CLAUDE.md` lines to add by hand.
+`~/.local/bin/ontos`, links `skills/*/` into `~/.claude/skills/`, and prints the
+`Bash(ontos:*)` permission, the `SessionStart` hook and the `CLAUDE.md` lines to add by hand.
+The script never edits Claude Code's files itself.
+
+### Setting up with an agent
+
+Point an agent at this section. It needs `go` on `PATH` (`nix develop` in this checkout).
+
+1. Run `./scripts/setup.sh` and fix any warning it prints.
+2. If the config was `(created)`, ask the user whether `store` should be a synced folder
+   instead of `~/ontos`; if so, edit it and re-run the script.
+3. Apply the block the script prints at the end. Merge it into the existing files: keep every
+   other permission, hook and line, and skip what is already there.
+4. Run `ontos subject list` to check the store is readable; it must exit 0. Tell the user the
+   hook loads from the next session or `/clear`, and that `/ontos-bootstrap` builds a repo's
+   first entries.
 
 ## The verbs
 

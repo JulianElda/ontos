@@ -33,7 +33,7 @@ internal/ontos/resolve.go  directory -> subject, recording every step
 internal/ontos/search.go   term matching, scoring, filters
 internal/ontos/context.go  what a session starts with, and its markdown
 internal/ontos/rules.go    the maintenance rules context prints
-internal/ontos/conflicts.go sync-conflict file names, copied from pragma
+internal/ontos/conflicts.go sync-conflict file names
 ```
 
 Rules that hold the design in place:

@@ -102,5 +102,5 @@ Add to ~/.claude/CLAUDE.md:
 
   Repo knowledge (how code is laid out, works, and breaks) goes in ontos; `ontos context` loads it at session start.
   Personal preferences and feedback go in auto memory, not ontos.
-  Plans and open work go in pragma, not ontos.
+  Plans and open work don't go in ontos.
 EOF
