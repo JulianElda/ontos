@@ -1,0 +1,5 @@
+# A stray local build; the real one is installed by scripts/setup.sh.
+/ontos
+
+# direnv's cached dev shell; also the nix-direnv GC root.
+/.direnv/
