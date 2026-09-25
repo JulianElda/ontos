@@ -5,7 +5,7 @@ import "strings"
 // conflictMarkers are the substrings sync clients put in a filename when two
 // machines changed one file and neither copy could be discarded. The store is
 // synced, so these land next to the entries, where loading them would put two
-// versions of one entry in play. Copied from pragma, which faces the same.
+// versions of one entry in play.
 //
 // Only unambiguous markers are here. OneDrive appends the machine name
 // (x-DESKTOP-4K2J1.json) and Google Drive appends a counter (x (1).json); an

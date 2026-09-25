@@ -35,7 +35,7 @@ How things stand or run → `map`/`mechanism`; limits what Claude may change →
 `invariant`; will surprise Claude → `gotcha`; steps → `procedure`; starts from a
 symptom → `diagnosis`; broken or unreliable → `gap`; points outside → `reference`.
 An in-progress migration splits: the direction is an `invariant`, the remaining
-work goes to pragma, and the list of call sites is not stored.
+work belongs in a task tracker, and the list of call sites is not stored.
 
 **Precision bar.** State the exact trigger and the exact rule, falsifiably: "the
 client's `subscribe()` while disconnected silently does nothing", never "be careful
@@ -48,7 +48,7 @@ rule precisely, don't propose it.
   file contains)
 - anything the repo's committed docs (`CLAUDE.md`, `README`, `docs/`) already state:
   one fact, one home
-- plans and open work (pragma), preferences and feedback (auto memory)
+- plans and open work (a task tracker), preferences and feedback (auto memory)
 - secrets, tokens, credentials, and URLs with credentials in them
 
 A fact that several repos share (an environment, a library, a protocol) becomes its
