@@ -73,6 +73,38 @@ func CleanSubjectPath(p string) (string, error) {
 	return p, nil
 }
 
+// DefaultName is the name `ontos subject add` gives a subject when --name is
+// not given: the repo's directory name, plus /<path> in a package.
+func DefaultName(loc *Location, path string) (string, error) {
+	if loc.Toplevel == "" {
+		return "", fmt.Errorf("not inside a git repository, so there is no default name; pass --name (and --url and --path if it has a repo)")
+	}
+	p, err := CleanSubjectPath(path)
+	if err != nil {
+		return "", err
+	}
+	name := loc.RepoName()
+	if p != "" {
+		name += "/" + p
+	}
+	return name, nil
+}
+
+// DefaultSubject is the subject `ontos subject add` with no flags adds when
+// run in loc.Dir, so `subject which` can show it before anything is written.
+// The error says why there is none and what to run instead.
+func DefaultSubject(loc *Location) (*Subject, error) {
+	name, err := DefaultName(loc, loc.Rel)
+	if err != nil {
+		return nil, err
+	}
+	sub := &Subject{Name: name, URL: NormalizeURL(loc.Remote), Path: loc.Rel}
+	if sub.Path != "" && sub.URL == "" {
+		return nil, fmt.Errorf("the repo has no remote.origin.url, and a package subject needs one; run `ontos subject add` in %s for the repo, or pass --url", loc.Toplevel)
+	}
+	return sub, nil
+}
+
 // PutSubject validates sub and writes it. The same url and path on two
 // subjects would make resolution depend on which loaded first, so that is
 // refused; subjects with no url never resolve from a directory and can share

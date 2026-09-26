@@ -45,7 +45,8 @@ subjects:
       subject with no repo, such as a protocol or an environment.
   ontos subject update <name> [--url <u>] [--path <p>] [--uses <s>...]
   ontos subject list
-  ontos subject which [path]        how path resolves to a subject, step by step
+  ontos subject which [path]        how path resolves to a subject, step by step,
+      or what subject add would create there when nothing resolves
 
 categories: map mechanism invariant gotcha procedure diagnosis gap reference
 certainty:  confirmed (ran it or read it in code), inferred, suspected

@@ -1,6 +1,10 @@
 package ontos
 
-import "testing"
+import (
+	"path/filepath"
+	"strings"
+	"testing"
+)
 
 func TestNormalizeURL(t *testing.T) {
 	const want = "github.com/Org/Repo"
@@ -52,5 +56,45 @@ func TestCleanSubjectPath(t *testing.T) {
 		if _, err := CleanSubjectPath(bad); err == nil {
 			t.Errorf("CleanSubjectPath(%q) accepted a path outside the repo", bad)
 		}
+	}
+}
+
+func TestDefaultSubject(t *testing.T) {
+	dir := gitRepo(t, "git@github.com:Org/Repo.git")
+	for rel, want := range map[string]Subject{
+		".":               {Name: "repo", URL: "github.com/Org/Repo"},
+		"packages/logger": {Name: "repo/packages/logger", URL: "github.com/Org/Repo", Path: "packages/logger"},
+	} {
+		loc, err := Locate(filepath.Join(dir, rel))
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := DefaultSubject(loc)
+		if err != nil {
+			t.Fatalf("%s: %v", rel, err)
+		}
+		if got.Name != want.Name || got.URL != want.URL || got.Path != want.Path {
+			t.Errorf("%s: DefaultSubject = %+v, want %+v", rel, *got, want)
+		}
+	}
+}
+
+func TestDefaultSubjectWithoutOrigin(t *testing.T) {
+	dir := gitRepo(t, "")
+	loc, err := Locate(filepath.Join(dir, "packages", "logger"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// PutSubject refuses a path with no url, so there is nothing to propose
+	// in a package; the error points at the repo root instead.
+	if _, err := DefaultSubject(loc); err == nil || !strings.Contains(err.Error(), loc.Toplevel) {
+		t.Errorf("DefaultSubject in a package with no origin: err = %v, want one naming %s", err, loc.Toplevel)
+	}
+	loc, err = Locate(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := DefaultSubject(loc); err == nil || !strings.Contains(err.Error(), "pass --name") {
+		t.Errorf("DefaultSubject outside git: err = %v, want one saying to pass --name", err)
 	}
 }
