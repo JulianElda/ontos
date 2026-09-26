@@ -53,26 +53,15 @@ func (a *app) cmdSubjectAdd(args []string) error {
 	if err != nil {
 		return err
 	}
-	if loc.Toplevel == "" {
-		if !set["name"] {
-			return fmt.Errorf("not inside a git repository, so there is no default name; pass --name (and --url and --path if it has a repo)")
+	if loc.Toplevel != "" && !set["url"] {
+		sub.URL = loc.Remote
+		if !set["path"] {
+			sub.Path = loc.Rel
 		}
-	} else {
-		if !set["url"] {
-			sub.URL = loc.Remote
-			if !set["path"] {
-				sub.Path = loc.Rel
-			}
-		}
-		if !set["name"] {
-			p, err := ontos.CleanSubjectPath(sub.Path)
-			if err != nil {
-				return err
-			}
-			sub.Name = loc.RepoName()
-			if p != "" {
-				sub.Name += "/" + p
-			}
+	}
+	if !set["name"] {
+		if sub.Name, err = ontos.DefaultName(loc, sub.Path); err != nil {
+			return err
 		}
 	}
 
@@ -220,10 +209,21 @@ func (a *app) cmdSubjectWhich(args []string) error {
 	for i, step := range r.Steps {
 		a.printf("%d. %s\n", i+1, step)
 	}
-	if r.Subject == nil {
-		a.printf("\nNo subject resolves here (fix: `ontos subject add` in this directory).\n")
-	} else {
+	if r.Subject != nil {
 		a.printf("\nSubject: %s\n", describeSubject(r.Subject))
+		return nil
+	}
+	// Show what `subject add` would do here, from the same code it runs, so
+	// the proposal and the write cannot disagree.
+	def, err := ontos.DefaultSubject(r.Location)
+	switch {
+	case err != nil:
+		a.printf("\nNo subject resolves here (fix: %v).\n", err)
+	case s.Subjects[def.Name] != nil:
+		a.printf("\nNo subject resolves here, and `ontos subject add` in %s would fail: the name %s is taken by %s (fix: `ontos subject add --name <another>` in %s, or `ontos subject update %s` if that is this repo).\n",
+			r.Location.Dir, def.Name, describeSubject(s.Subjects[def.Name]), r.Location.Dir, def.Name)
+	default:
+		a.printf("\nNo subject resolves here (fix: `ontos subject add` in %s adds %s).\n", r.Location.Dir, describeSubject(def))
 	}
 	return nil
 }

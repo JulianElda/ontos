@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -179,5 +180,59 @@ func TestContextBadArgumentsExitZero(t *testing.T) {
 	}
 	if !strings.Contains(out.String(), "## Maintenance rules") {
 		t.Errorf("rules missing:\n%s", out.String())
+	}
+}
+
+// gitRepo makes a git repo at <tmp>/repo with a packages/logger directory and
+// origin git@github.com:Org/Repo.git.
+func gitRepo(t *testing.T) string {
+	t.Helper()
+	dir := filepath.Join(t.TempDir(), "repo")
+	if err := os.MkdirAll(filepath.Join(dir, "packages", "logger"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for _, args := range [][]string{{"init", "-q"}, {"remote", "add", "origin", "git@github.com:Org/Repo.git"}} {
+		if out, err := exec.Command("git", append([]string{"-C", dir}, args...)...).CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v\n%s", args, err, out)
+		}
+	}
+	return dir
+}
+
+func TestWhichProposesWhatSubjectAddAdds(t *testing.T) {
+	c := newCLI(t)
+	t.Chdir(filepath.Join(gitRepo(t), "packages", "logger"))
+
+	out := c.ok("", "subject", "which")
+	_, proposed, ok := strings.Cut(out, " adds ")
+	proposed = strings.TrimSuffix(proposed, ").\n")
+	if want := "repo/packages/logger: github.com/Org/Repo, path packages/logger"; !ok || proposed != want {
+		t.Fatalf("which proposed %q, want %q\n%s", proposed, want, out)
+	}
+	if added := c.ok("", "subject", "add"); added != "added subject "+proposed+"\n" {
+		t.Errorf("subject add printed %q, but which proposed %q", added, proposed)
+	}
+	if out := c.ok("", "subject", "which"); !strings.Contains(out, "Subject: "+proposed) {
+		t.Errorf("which after add:\n%s", out)
+	}
+}
+
+func TestWhichNamesTheSubjectInTheWay(t *testing.T) {
+	c := newCLI(t)
+	// Another checkout named repo, whose package has the name this one would get.
+	c.ok("", "subject", "add", "--name", "repo/packages/logger", "--url", "github.com/Other/Repo", "--path", "packages/logger")
+	out := c.ok("", "subject", "which", filepath.Join(gitRepo(t), "packages", "logger"))
+	for _, want := range []string{"would fail", "repo/packages/logger: github.com/Other/Repo", "`ontos subject update repo/packages/logger`"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("which output lacks %q:\n%s", want, out)
+		}
+	}
+}
+
+func TestWhichOutsideGitSaysToPassName(t *testing.T) {
+	c := newCLI(t)
+	out := c.ok("", "subject", "which", t.TempDir())
+	if !strings.Contains(out, "pass --name") || strings.Contains(out, "`ontos subject add` in") {
+		t.Errorf("which outside git should say to pass --name, not to run subject add there:\n%s", out)
 	}
 }

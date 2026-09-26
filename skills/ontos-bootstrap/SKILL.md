@@ -67,10 +67,11 @@ ontos context [path]
 git -C <path> rev-parse --short HEAD
 ```
 
-- `which` shows whether a subject resolves. If none does, the subject to create goes
-  into step 5's table, with the name, url and path `ontos subject add` would take
-  from the directory (step 1 of `which` shows them). If the directory is a package,
-  propose its subject and the repo root's.
+- `which` shows whether a subject resolves. If none does, its last line is the
+  subject `ontos subject add` would create in that directory (name, url, path), or
+  why it can't create one and what to pass instead. That subject goes into step 5's
+  table. If the directory is a package, propose its subject and the repo root's;
+  `ontos subject which <toplevel>` gives the root's.
 - The short sha is what every entry written or re-verified in this run gets as
   `--checked`.
 - **Port:** if `$ARGUMENTS` names a `.claude-docs` directory or a `CLAUDE.local.md`,
@@ -79,8 +80,9 @@ git -C <path> rev-parse --short HEAD
 
 ## 2. Re-verify what exists
 
-Only if `ontos search --subject <subject>` lists entries (and the same for every
-subject in `uses` that belongs to this repo).
+Skip this step if step 1 found no subject: `search --subject` fails on a subject
+that doesn't exist yet. Otherwise, only if `ontos search --subject <subject>` lists
+entries (and the same for every subject in `uses` that belongs to this repo).
 
 `ontos get` them, several ids per call, and check each against its `sources` at
 HEAD. Give each one verdict:
@@ -137,9 +139,10 @@ For each candidate, from a fork or from a ported doc section:
 2. **Apply the skip list** and the precision bar above.
 3. **Merge duplicates** across forks. Split a candidate that answers more than one
    question.
-4. **Search before adding.** Run `ontos search <key terms>` for each title. If an
-   entry already answers the same question, the candidate becomes an update of that
-   entry.
+4. **Search before adding.** For each title, run `ontos search` with one or two
+   distinctive terms from it, then again with a synonym for the main one: every
+   term has to match, so more terms find less. If an entry already answers the same
+   question, the candidate becomes an update of that entry.
 5. **Link.** Note which candidates point to each other; `related` is set in step 6,
    once they have ids.
 
@@ -178,7 +181,8 @@ In this order, so every reference exists before it is used:
    EOF
    ```
 
-   `add` prints the new id; keep each one next to its title. For an update, run
+   The quotes are single so backticks in a title or trigger stay literal; write an
+   apostrophe inside them as `'\''`. `add` prints the new id; keep each one next to its title. For an update, run
    `ontos update <id>` with the flags that changed plus `--checked <sha>`.
 4. Links: `ontos update <id> --related <id> --related <id>` for each entry that
    points to others. `--related` replaces the whole list, so name every id each time.
